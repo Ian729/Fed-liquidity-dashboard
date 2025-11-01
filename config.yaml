@@ -22,5 +22,5 @@ scoring:
   macro_weakness:
     curve_weight: 0.6
     copper_wti_weight: 0.4
-commit_results: false
+commit_results: true
 
