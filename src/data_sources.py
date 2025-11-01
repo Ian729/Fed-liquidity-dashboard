@@ -25,19 +25,50 @@ def fred_series(series_id: str, start_date: str) -> pd.Series:
     return df["value"].asfreq("D").interpolate(limit_direction="both")
 
 
-def yf_series(ticker: str, start_date: str) -> pd.Series:
-    try:
-        df = yf.download(ticker, start=start_date, auto_adjust=True, progress=False)
-        if df.empty:
-            print(f"Warning: No data for {ticker}")
-            return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
-        if "Close" not in df.columns:
-            print(f"Warning: No 'Close' column for {ticker}")
-            return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
-        s = df["Close"].copy()
-        s.index = pd.to_datetime(s.index)
-        return s
-    except Exception as e:
-        print(f"Error downloading {ticker}: {e}")
-        return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+def yf_series(ticker: str, start_date: str, max_retries: int = 3) -> pd.Series:
+    """Download yfinance data with retry logic and alternative tickers."""
+    # Alternative ticker mappings for common failures
+    alternatives = {
+        "DX-Y.NYB": ["^DXY", "DX=F", "DX-Y.NYB"],
+        "HG=F": ["HG=F", "HG=F"],
+        "CL=F": ["CL=F", "CL=F"],
+        "HYG": ["HYG"],
+        "IEF": ["IEF"],
+    }
+    
+    ticker_list = alternatives.get(ticker, [ticker])
+    
+    for attempt_ticker in ticker_list:
+        for attempt in range(max_retries):
+            try:
+                import time
+                if attempt > 0:
+                    time.sleep(2 ** attempt)  # Exponential backoff
+                
+                df = yf.download(attempt_ticker, start=start_date, auto_adjust=True, progress=False, timeout=10)
+                if df.empty:
+                    if attempt < max_retries - 1:
+                        continue
+                    print(f"Warning: No data for {ticker} (tried {attempt_ticker})")
+                    return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+                
+                if "Close" not in df.columns:
+                    if attempt < max_retries - 1:
+                        continue
+                    print(f"Warning: No 'Close' column for {ticker} (tried {attempt_ticker})")
+                    return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+                
+                s = df["Close"].copy()
+                s.index = pd.to_datetime(s.index)
+                if len(s) > 0:
+                    return s
+                    
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    continue
+                # Only print error on last attempt of last ticker alternative
+                if attempt_ticker == ticker_list[-1] and attempt == max_retries - 1:
+                    print(f"Warning: Failed to download {ticker} after {max_retries} attempts (tried: {', '.join(ticker_list)})")
+    
+    return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
 

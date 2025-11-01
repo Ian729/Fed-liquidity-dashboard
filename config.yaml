@@ -7,7 +7,7 @@ series:
     DGS2: "DGS2"        # 2Y yield
     DGS10: "DGS10"      # 10Y yield
   yfinance:
-    DXY: "DX-Y.NYB"     # ICE Dollar Index (alt: "^DXY")
+    DXY: "^DXY"         # ICE Dollar Index (alt: "DX-Y.NYB", "DX=F")
     HYG: "HYG"
     IEF: "IEF"
     COPPER: "HG=F"
