@@ -1,6 +1,6 @@
 # Daily Macro Liquidity Dashboard
 
-Generated: 2026-01-11T10:35:31.608534+00:00Z
+Generated: 2026-01-12T10:42:01.084815+00:00Z
 
 ## Headline Scores
 
