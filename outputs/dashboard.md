@@ -1,10 +1,10 @@
 # Daily Macro Liquidity Dashboard
 
-Generated: 2026-07-17T11:38:34.941999+00:00Z
+Generated: 2026-07-18T11:17:04.788368+00:00Z
 
 ## Headline Scores
 
-- **LiquidityScore**: 17.2
+- **LiquidityScore**: 17.3
 - **RiskScore**: nan
 - **MacroWeaknessScore**: nan
 
